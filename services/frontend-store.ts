@@ -1,11 +1,11 @@
-import { expenses, leases, managementContracts, owners, payments, properties, receivables, settlements, tenants, units } from '@/mocks/data'
+import { bankMatches, bankTransactions, companyBankAccounts, expenses, leases, managementContracts, owners, paymentAllocations, payments, properties, receivables, settlements, tenants, units } from '@/mocks/data'
 import { attachmentsData } from '@/mocks/attachments-data'
-import { maintenanceRequests, remindersData } from '@/mocks/operations-data'
+import { collectionFollowUps, communicationLogs, generatedDocuments, maintenanceRequests, remindersData } from '@/mocks/operations-data'
 import type { AuditLog } from '@/types/domain'
 
 const key = 'bader-alsiwan.frontend-data.v1'
 export const auditLogs: AuditLog[] = []
-const collections = { owners, properties, units, tenants, leases, receivables, payments, expenses, managementContracts, settlements, attachmentsData, maintenanceRequests, remindersData, auditLogs }
+const collections = { owners, properties, units, tenants, leases, receivables, payments, paymentAllocations, companyBankAccounts, bankTransactions, bankMatches, expenses, managementContracts, settlements, attachmentsData, maintenanceRequests, remindersData, collectionFollowUps, communicationLogs, generatedDocuments, auditLogs }
 type CollectionKey = keyof typeof collections
 
 export function persistFrontendData() { if (typeof window === 'undefined') return; localStorage.setItem(key, JSON.stringify(collections)) }

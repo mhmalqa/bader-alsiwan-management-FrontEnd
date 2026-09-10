@@ -1,1 +1,3 @@
-import { LeaseFormPage } from '@/features/leases/form-page'; export default function Page() { return <LeaseFormPage /> }
+import { NewLeasePage } from '@/features/leases/new-page'
+
+export default function Page() { return <NewLeasePage /> }

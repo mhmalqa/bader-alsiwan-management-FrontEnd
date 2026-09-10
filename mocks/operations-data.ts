@@ -1,4 +1,4 @@
-import type { DocumentTemplate, MaintenanceRequest, Notification, Reminder } from '@/types/domain'
+import type { CollectionFollowUp, CommunicationLog, DocumentTemplate, GeneratedDocument, MaintenanceRequest, Notification, Reminder } from '@/types/domain'
 
 export const maintenanceRequests: MaintenanceRequest[] = [
   { id: '1', propertyId: '1', unitId: '1', ownerId: '1', title: 'تسرب مياه في مكتب 203', description: 'فحص وإصلاح التسرب في دورة المياه.', estimatedCost: 2400, status: 'draft', requiresOwnerApproval: true, priority: 'high', requestedAt: '2026-01-15', vendorName: 'مؤسسة الإصلاح السريع', approvalStatus: 'pending' },
@@ -13,6 +13,10 @@ export const notificationsData: Notification[] = [
   { id: '1', title: 'تم تسجيل دفعة', body: 'تم تحصيل 30,000 ر.س من شركة أبعاد للمقاولات.', isRead: false, createdAt: '2026-01-03' },
   { id: '2', title: 'طلب صيانة يحتاج اعتماداً', body: 'طلب مكتب 203 تجاوز حد الاعتماد المحدد.', isRead: false, createdAt: '2026-01-15' },
 ]
+
+export const collectionFollowUps: CollectionFollowUp[] = []
+export const communicationLogs: CommunicationLog[] = []
+export const generatedDocuments: GeneratedDocument[] = []
 
 export const documentTemplatesData: DocumentTemplate[] = [
   { id: '1', name: 'خطاب مطالبة بسداد', category: 'التحصيل', bodyHtml: '<h1>خطاب مطالبة بسداد</h1>', isActive: true },

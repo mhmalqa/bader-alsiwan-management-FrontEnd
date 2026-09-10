@@ -1,11 +1,12 @@
 'use client'
 /* eslint-disable react-hooks/immutability */
 
-import { Building2, CheckCircle2, FileText, MapPin, UserRound, WalletCards, Wrench } from 'lucide-react'
-import { useState } from 'react'
+import { Building2, CalendarDays, CheckCircle2, FileText, Landmark, MapPin, Search, UserRound, WalletCards, Wrench } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { AppDialog } from './app-dialog'
+import { notifySuccess } from './app-toast'
 import { createQuickRecord } from '@/services/quick-create'
-import { owners, properties, receivables, tenants, units } from '@/mocks/data'
+import { leases, owners, properties, receivables, tenants, units } from '@/mocks/data'
 
 export type CreateRecordKind = 'owner' | 'property' | 'unit' | 'tenant' | 'lease' | 'payment' | 'expense' | 'managementContract' | 'maintenance'
 type Field = { key: string; label: string; required?: boolean; type?: 'text' | 'tel' | 'email' | 'number' | 'date' | 'url'; options?: string[]; section: string; span?: boolean }
@@ -25,13 +26,37 @@ const configs: Config[] = [
 ]
 const blank = (fields: Field[]) => Object.fromEntries(fields.map((field) => [field.key, ''])) as Record<string, string>
 
+function QuickPaymentForm({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [query, setQuery] = useState('')
+  const [receivableId, setReceivableId] = useState('')
+  const [amount, setAmount] = useState('')
+  const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const [paymentMethod, setPaymentMethod] = useState('تحويل بنكي')
+  const [reference, setReference] = useState('')
+  const [error, setError] = useState('')
+  const [saved, setSaved] = useState(false)
+  const matches = useMemo(() => receivables.filter((item) => item.remainingAmount > 0).filter((item) => `${tenants.find((tenant) => tenant.id === item.tenantId)?.fullName} ${properties.find((property) => property.id === item.propertyId)?.propertyName} ${units.find((unit) => unit.id === item.unitId)?.unitNameOrNumber} ${item.id}`.toLocaleLowerCase('ar').includes(query.toLocaleLowerCase('ar'))), [query])
+  const selected = receivables.find((item) => item.id === receivableId)
+  const selectReceivable = (item: (typeof receivables)[number]) => { setReceivableId(item.id); setAmount(String(item.remainingAmount)); setQuery(''); setError(''); setSaved(false) }
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => { event.preventDefault(); if (!selected || !Number(amount) || Number(amount) > selected.remainingAmount) return; if (paymentMethod === 'تحويل بنكي' && !reference.trim()) { setError('مرجع الحوالة البنكي مطلوب لتوثيق الدفعة.'); return } try { await createQuickRecord('payment', { receivableId: selected.id, amount, paymentDate, paymentMethod, transactionReference: reference }); setSaved(true); setError(''); notifySuccess({ title: 'تم تسجيل الدفعة بنجاح', description: `تم ربط ${new Intl.NumberFormat('ar-SA').format(Number(amount))} ر.س بالقسط المحدد.` }); window.setTimeout(onClose, 850) } catch (reason) { setError(reason instanceof Error ? reason.message : 'تعذر تسجيل الدفعة.') } }
+  return <AppDialog open={open} onClose={onClose} title="تسجيل دفعة مستأجر" description="ابحث عن المستأجر أو العقار، ثم راجع القسط قبل توثيق الدفعة."><form className="quick-payment-form" onSubmit={submit}><section className="quick-payment-picker"><div className="quick-payment-picker__heading"><div><span>1</span><div><b>حدد الاستحقاق</b><small>ابحث باسم المستأجر أو العقار أو الوحدة</small></div></div>{selected && <button type="button" onClick={() => { setReceivableId(''); setAmount('') }}>تغيير الاستحقاق</button>}</div>{!selected ? <><label className="quick-payment-search"><Search size={18} /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="ابحث باسم المستأجر أو العقار أو رقم القسط…" /></label><div className="quick-payment-options">{matches.slice(0, 6).map((item) => { const tenant = tenants.find((record) => record.id === item.tenantId); const property = properties.find((record) => record.id === item.propertyId); const unit = units.find((record) => record.id === item.unitId); const lease = leases.find((record) => record.id === item.leaseId); return <button type="button" key={item.id} onClick={() => selectReceivable(item)}><div className="quick-payment-option__person"><UserRound size={17} /><div><b>{tenant?.fullName ?? 'مستأجر غير محدد'}</b><span>{tenant?.mobilePrimary ?? '—'}</span></div></div><div className="quick-payment-option__place"><span>{property?.propertyName ?? 'عقار غير محدد'}</span><b>{unit?.unitNameOrNumber ?? 'وحدة غير محددة'}</b></div><div className="quick-payment-option__due"><span>قسط {item.installmentNumber} · {item.dueDate}</span><small>عقد {lease?.internalContractNumber ?? '—'}</small></div><strong>{new Intl.NumberFormat('ar-SA').format(item.remainingAmount)} ر.س</strong></button> })}{!matches.length && <p>لا توجد استحقاقات مفتوحة مطابقة للبحث.</p>}</div></> : <section className="quick-payment-context"><header><span><CheckCircle2 size={18} /> تم تحديد القسط</span><b>المتبقي: {new Intl.NumberFormat('ar-SA').format(selected.remainingAmount)} ر.س</b></header><div><span><UserRound size={16} /> المستأجر<b>{tenants.find((item) => item.id === selected.tenantId)?.fullName}</b></span><span><Building2 size={16} /> العقار والوحدة<b>{properties.find((item) => item.id === selected.propertyId)?.propertyName} · {units.find((item) => item.id === selected.unitId)?.unitNameOrNumber}</b></span><span><CalendarDays size={16} /> تاريخ الاستحقاق<b>{selected.dueDate} · القسط {selected.installmentNumber}</b></span><span><Landmark size={16} /> عقد الإيجار<b>{leases.find((item) => item.id === selected.leaseId)?.internalContractNumber}</b></span></div></section>}</section>{selected && <section className="quick-payment-details"><div className="quick-payment-details__heading"><span>2</span><div><b>بيانات الدفعة</b><small>وثّق طريقة السداد ومرجع العملية</small></div></div><div className="quick-payment-fields"><label>المبلغ (ر.س)<input required type="number" min="1" max={selected.remainingAmount} value={amount} onChange={(event) => setAmount(event.target.value)} /></label><label>تاريخ الاستلام<input required type="date" value={paymentDate} onChange={(event) => setPaymentDate(event.target.value)} /></label><label>طريقة الدفع<select value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)}><option>تحويل بنكي</option><option>نقدي</option><option>شيك</option><option>بطاقة</option></select></label><label>مرجع العملية {paymentMethod === 'تحويل بنكي' && <em>*</em>}<input required={paymentMethod === 'تحويل بنكي'} value={reference} onChange={(event) => setReference(event.target.value)} placeholder="رقم الحوالة أو المرجع البنكي" /></label></div></section>}{error && <p className="error-message">{error}</p>}{saved && <p className="modal-success-message"><CheckCircle2 /> تم تسجيل الدفعة وربطها بالقسط المحدد.</p>}<footer><button type="button" className="cancel-button" onClick={onClose}>إلغاء</button><button className="add-button" type="submit" disabled={!selected || !amount}>حفظ وتوثيق الدفعة</button></footer></form></AppDialog>
+}
+
 export function CreateRecordModal({ open, onClose, initialKind = 'owner' }: { open: boolean; onClose: () => void; initialKind?: CreateRecordKind }) {
   const initial = configs.find((item) => item.kind === initialKind) ?? configs[0]
   const [kind, setKind] = useState<CreateRecordKind>(initial.kind)
   const [values, setValues] = useState<Record<string, string>>(blank(initial.fields))
   const [saved, setSaved] = useState(false)
   const current = configs.find((item) => item.kind === kind) ?? initial
+  if (current.kind === 'payment') return <QuickPaymentForm open={open} onClose={onClose} />
   const optionsFor = (field: Field) => {
+    if (field.key === 'receivableId') return receivables.filter((item) => item.remainingAmount > 0).map((item) => {
+      const lease = leases.find((contract) => contract.id === item.leaseId)
+      const tenant = tenants.find((record) => record.id === item.tenantId)
+      const property = properties.find((record) => record.id === item.propertyId)
+      const unit = units.find((record) => record.id === item.unitId)
+      return `${item.id} — ${tenant?.fullName ?? 'مستأجر غير محدد'} — ${property?.propertyName ?? 'عقار غير محدد'} / ${unit?.unitNameOrNumber ?? 'وحدة غير محددة'} — عقد ${lease?.internalContractNumber ?? '—'} — استحقاق ${item.dueDate} — متبقي ${new Intl.NumberFormat('ar-SA').format(item.remainingAmount)} ر.س`
+    })
     if (field.key === 'ownerId') return owners.map((item) => item.fullName)
     if (field.key === 'propertyId') return properties.map((item) => item.propertyName)
     if (field.key === 'unitId') return units.map((item) => item.unitNameOrNumber)
@@ -40,7 +65,7 @@ export function CreateRecordModal({ open, onClose, initialKind = 'owner' }: { op
     return field.options
   }
   const select = (item: Config) => { setKind(item.kind); setValues(blank(item.fields)); setSaved(false) }
-  const submit = async (event: React.FormEvent<HTMLFormElement>) => { event.preventDefault(); if (current.fields.some((field) => field.required && !values[field.key]?.trim())) return; await createQuickRecord(kind, values); setSaved(true) }
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => { event.preventDefault(); if (current.fields.some((field) => field.required && !values[field.key]?.trim())) return; await createQuickRecord(kind, values); setSaved(true); notifySuccess({ title: `تم حفظ ${current.label} بنجاح`, description: 'تم توثيق السجل وإضافته إلى بيانات النظام.' }); window.setTimeout(onClose, 850) }
   let previousSection = ''
   return <AppDialog open={open} onClose={onClose} title="إضافة سجل جديد" description="اختر نوع السجل، ثم أدخل البيانات من دون مغادرة الصفحة."><div className="full-create-modal"><aside>{configs.map((item) => { const Icon = item.icon; return <button type="button" key={item.kind} className={kind === item.kind ? 'selected' : ''} onClick={() => select(item)}><Icon size={18} /><span><b>{item.label}</b><small>{item.description}</small></span></button> })}</aside><form onSubmit={submit}><header><h3>{current.label}</h3><p>{current.description}</p></header>{current.kind === 'property' && <p className="map-note"><MapPin size={16} /> أضف رابط الخريطة أو الإحداثيات لحفظ موقع العقار.</p>}<div className="full-form-grid">{current.fields.map((field) => { const showSection = previousSection !== field.section; previousSection = field.section; const options = optionsFor(field); return <div className={field.span ? 'wide-field' : ''} key={field.key}>{showSection && <h4>{field.section}</h4>}<label>{field.label}{field.required && <em> *</em>}{options ? <select required={field.required} value={values[field.key]} onChange={(event) => setValues({ ...values, [field.key]: event.target.value })}><option value="">اختر {field.label}</option>{options.map((option) => <option value={option} key={option}>{option}</option>)}</select> : <input required={field.required} type={field.type} value={values[field.key]} onChange={(event) => setValues({ ...values, [field.key]: event.target.value })} />}</label></div> })}</div>{saved && <p className="modal-success-message"><CheckCircle2 /> تم حفظ السجل محلياً وتوثيق العملية.</p>}<footer><button type="button" className="cancel-button" onClick={onClose}>إلغاء</button><button className="add-button" type="submit">حفظ {current.label}</button></footer></form></div></AppDialog>
 }

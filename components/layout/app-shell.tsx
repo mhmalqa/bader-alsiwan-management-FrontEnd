@@ -10,13 +10,14 @@ import { CreateRecordModal, type CreateRecordKind } from '@/components/shared/cr
 import { LeaseCreateModal } from '@/features/leases/lease-create-modal'
 import { SettlementTransferModal } from '@/features/settlements/settlement-transfer-modal'
 import { CreateSettlementModal } from '@/features/settlements/create-settlement-modal'
+import { AppToastHost } from '@/components/shared/app-toast'
 
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboard }
 type NavGroup = { id: string; label: string; icon: typeof LayoutDashboard; items: NavItem[] }
 const groups: NavGroup[] = [
   { id: 'dashboard', label: 'الرئيسية', icon: LayoutDashboard, items: [{ href: '/dashboard', label: 'لوحة التحكم', icon: LayoutDashboard }] },
   { id: 'portfolio', label: 'إدارة الأملاك', icon: Building2, items: [{ href: '/owners', label: 'الملاك', icon: Users }, { href: '/management-contracts', label: 'عقود الإدارة', icon: FileText }, { href: '/properties', label: 'العقارات', icon: Building2 }, { href: '/units', label: 'الوحدات والشقق والأدوار', icon: Building2 }, { href: '/tenants', label: 'المستأجرون', icon: Users }, { href: '/leases', label: 'عقود الإيجار', icon: FileText }] },
-  { id: 'finance', label: 'المالية والتشغيل', icon: WalletCards, items: [{ href: '/receivables', label: 'الاستحقاقات والتحصيل', icon: WalletCards }, { href: '/payments', label: 'المدفوعات', icon: WalletCards }, { href: '/expenses', label: 'المصروفات', icon: WalletCards }, { href: '/maintenance', label: 'طلبات الصيانة', icon: Wrench }, { href: '/owner-settlements', label: 'تسويات الملاك', icon: WalletCards }] },
+  { id: 'finance', label: 'المالية والتشغيل', icon: WalletCards, items: [{ href: '/receivables', label: 'الاستحقاقات والتحصيل', icon: WalletCards }, { href: '/payments', label: 'المدفوعات', icon: WalletCards }, { href: '/bank-reconciliation', label: 'المطابقة البنكية', icon: WalletCards }, { href: '/expenses', label: 'المصروفات', icon: WalletCards }, { href: '/maintenance', label: 'طلبات الصيانة', icon: Wrench }, { href: '/owner-settlements', label: 'تسويات الملاك', icon: WalletCards }] },
   { id: 'tools', label: 'المتابعة والتقارير', icon: FileBarChart, items: [{ href: '/reminders', label: 'المهام والتذكيرات', icon: Bell }, { href: '/documents', label: 'المستندات والخطابات', icon: FileText }, { href: '/reports', label: 'التقارير', icon: FileBarChart }, { href: '/settings', label: 'الإعدادات', icon: Settings }] },
 ]
 
@@ -57,5 +58,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <LeaseCreateModal open={leaseOpen} onClose={() => setLeaseOpen(false)} />
     <SettlementTransferModal key={`${settlementOpen}-${settlementId ?? 'new'}`} open={settlementOpen} initialSettlementId={settlementId} onClose={() => setSettlementOpen(false)} />
     <CreateSettlementModal key={String(settlementCreateOpen)} open={settlementCreateOpen} onClose={() => setSettlementCreateOpen(false)} />
+    <AppToastHost />
   </div>
 }

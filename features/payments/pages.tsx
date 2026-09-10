@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { BadgeCheck, CheckCircle2, CircleDollarSign, ReceiptText, RotateCcw, WalletCards } from 'lucide-react'
+import { AlertTriangle, BadgeCheck, CheckCircle2, CircleDollarSign, ReceiptText, RotateCcw, WalletCards } from 'lucide-react'
 import { useState } from 'react'
 import { AppDialog } from '@/components/shared/app-dialog'
 import { DataTable } from '@/components/shared/data-table'
@@ -65,14 +65,15 @@ export function PaymentsPage() {
       { key: 'paymentMethod', title: 'طريقة الدفع', render: (value) => methodLabel[String(value)] ?? String(value) },
       { key: 'paymentDate', title: 'تاريخ الاستلام' },
       { key: 'status', title: 'الحالة', render: (value) => <span className={`status-badge ${value === 'confirmed' ? 'success' : 'danger'}`}>{value === 'confirmed' ? 'مؤكدة' : 'ملغاة'}</span> },
-      { key: 'id', title: 'الإجراء', render: (_, row) => row.status === 'confirmed' ? <button className="table-action danger-action" onClick={() => setReversing(row)}><RotateCcw size={15} /> عكس الدفعة</button> : '—' },
+      { key: 'id', title: 'الإجراء', render: (_, row) => row.status === 'confirmed' ? <button className="table-action danger-action payment-reverse-action" onClick={() => setReversing(row)}><RotateCcw size={15} /><span>عكس الدفعة</span></button> : <span className="no-table-action">لا يوجد إجراء</span> },
     ]} />
 
     <AppDialog open={Boolean(reversing)} onClose={() => { setReversing(null); setReason('') }} title="عكس دفعة مستأجر" description="سيتم إعادة القسط إلى حالته السابقة وإزالة هذه الدفعة من إجمالي التحصيلات المؤكدة.">
       <div className="payment-reversal">
-        {reversing && <div className="reversal-summary"><span>الإيصال: <b>{reversing.paymentNumber}</b></span><span>المبلغ: <b>{money(reversing.amount)}</b></span></div>}
-        <label>سبب عكس الدفعة <em>*</em><textarea value={reason} onChange={(event) => setReason(event.target.value)} placeholder="مثال: تم تسجيل الدفعة على قسط غير صحيح" /></label>
-        <div className="modal-actions"><button className="secondary-button" onClick={() => { setReversing(null); setReason('') }}>إلغاء</button><button className="danger-button" disabled={!reason.trim()} onClick={confirmReversal}><RotateCcw size={16} /> تأكيد عكس الدفعة</button></div>
+        {reversing && <div className="reversal-summary" aria-label="ملخص الدفعة المراد عكسها"><div><span>رقم الإيصال</span><b>{reversing.paymentNumber}</b></div><div><span>المبلغ المستلم</span><strong>{money(reversing.amount)}</strong></div></div>}
+        <div className="reversal-warning"><AlertTriangle size={18} /><span>سيُلغى أثر هذه الدفعة من التحصيل ويُعاد المبلغ إلى رصيد القسط المستحق.</span></div>
+        <label className="reversal-reason-label"><span>سبب عكس الدفعة <em>*</em></span><textarea value={reason} onChange={(event) => setReason(event.target.value)} placeholder="مثال: تم تسجيل الدفعة على قسط غير صحيح" aria-describedby="reversal-reason-help" /><small id="reversal-reason-help">اكتب سبباً واضحاً من 5 أحرف على الأقل؛ سيظهر في سجل التدقيق.</small></label>
+        <div className="modal-actions reversal-actions"><button className="secondary-button" onClick={() => { setReversing(null); setReason('') }}>إلغاء والعودة</button><button className="danger-button" disabled={reason.trim().length < 5} onClick={confirmReversal}><RotateCcw size={16} /> تأكيد عكس الدفعة</button></div>
       </div>
     </AppDialog>
   </main>

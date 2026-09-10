@@ -14,7 +14,7 @@ const frequencyOptions = [
 ] as const
 
 export function LeaseCreateModal({ open, onClose }: Props) {
-  const [values, setValues] = useState({ internalContractNumber: '', ejarContractNumber: '', tenantId: '', propertyId: '', unitId: '', startDate: '', endDate: '', annualRent: '', paymentFrequency: 'annual', securityDeposit: '', noticePeriodDays: '' })
+  const [values, setValues] = useState({ internalContractNumber: '', ejarContractNumber: '', tenantId: '', propertyId: '', unitId: '', leasedSpaceType: 'unit', leasedSpaceLabel: '', startDate: '', endDate: '', annualRent: '', paymentFrequency: 'annual', securityDeposit: '', noticePeriodDays: '' })
   const [attachments, setAttachments] = useState<LocalAttachment[]>([])
   const [saving, setSaving] = useState(false)
   const [notice, setNotice] = useState('')
@@ -22,7 +22,7 @@ export function LeaseCreateModal({ open, onClose }: Props) {
   const update = (key: keyof typeof values, value: string) => setValues((current) => ({ ...current, [key]: value, ...(key === 'propertyId' ? { unitId: '' } : {}) }))
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!values.internalContractNumber || !values.tenantId || !values.propertyId || !values.unitId || !values.startDate || !values.endDate || !values.annualRent) return
+    if (!values.internalContractNumber || !values.tenantId || !values.propertyId || (values.leasedSpaceType === 'unit' && !values.unitId) || (values.leasedSpaceType === 'floor' && !values.leasedSpaceLabel) || !values.startDate || !values.endDate || !values.annualRent) return
     setSaving(true)
     await createQuickRecord('lease', values)
     setSaving(false)
@@ -37,7 +37,8 @@ export function LeaseCreateModal({ open, onClose }: Props) {
         <label>رقم عقد إيجار <input value={values.ejarContractNumber} onChange={(event) => update('ejarContractNumber', event.target.value)} placeholder="إن وجد" /></label>
         <label>المستأجر <em>*</em><SearchableSelect required value={values.tenantId} onChange={(value) => update('tenantId', value)} options={tenants.map((tenant) => ({ value: tenant.id, label: tenant.fullName }))} placeholder="ابحث واختر المستأجر" /></label>
         <label>العقار <em>*</em><SearchableSelect required value={values.propertyId} onChange={(value) => update('propertyId', value)} options={properties.map((property) => ({ value: property.id, label: property.propertyName }))} placeholder="ابحث واختر العقار" /></label>
-        <label>الوحدة / الشقة / الدور <em>*</em><SearchableSelect required disabled={!values.propertyId} value={values.unitId} onChange={(value) => update('unitId', value)} options={availableUnits.map((unit) => ({ value: unit.id, label: unit.unitNameOrNumber }))} placeholder="ابحث واختر الوحدة" /></label>
+        <label>نطاق التأجير <em>*</em><select value={values.leasedSpaceType} onChange={(event) => update('leasedSpaceType', event.target.value)}><option value="unit">وحدة / شقة</option><option value="floor">دور كامل</option><option value="whole_property">العقار بالكامل</option></select></label>
+        {values.leasedSpaceType === 'unit' ? <label>الوحدة / الشقة <em>*</em><SearchableSelect required disabled={!values.propertyId} value={values.unitId} onChange={(value) => update('unitId', value)} options={availableUnits.map((unit) => ({ value: unit.id, label: unit.unitNameOrNumber }))} placeholder="ابحث واختر الوحدة" /></label> : values.leasedSpaceType === 'floor' ? <label>اسم أو رقم الدور <em>*</em><input required value={values.leasedSpaceLabel} onChange={(event) => update('leasedSpaceLabel', event.target.value)} placeholder="مثال: الدور الأول" /></label> : <label>المساحة المؤجرة<input readOnly value={properties.find((property) => property.id === values.propertyId)?.propertyName ?? 'اختر العقار أولاً'} /></label>}
       </div></section>
       <section className="modal-form-section"><h3>المدة والتحصيل</h3><div className="modal-form-grid">
         <label>تاريخ بداية العقد <em>*</em><input required type="date" value={values.startDate} onChange={(event) => update('startDate', event.target.value)} /></label>

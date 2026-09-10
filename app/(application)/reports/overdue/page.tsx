@@ -1,1 +1,3 @@
-import { ReportPage } from '@/features/reports/pages'; export default function Page() { return <ReportPage kind="overdue" /> }
+import { OverdueReportPage } from '@/features/reports/overdue-page'
+
+export default function Page() { return <OverdueReportPage /> }

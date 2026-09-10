@@ -5,6 +5,7 @@ import './feature.css'
 import './professional-ui.css'
 import './table-ui.css'
 import './quick-create.css'
+import './quick-payment.css'
 import './full-create-modal.css'
 import './domain-pages.css'
 import './premium-design.css'
@@ -24,6 +25,9 @@ import './document-card-fix.css'
 import './searchable-select.css'
 import './settlement-composer.css'
 import './payment-collection.css'
+import './collection-dashboard.css'
+import './app-toast.css'
+import './unified-dialog.css'
 
 export const metadata: Metadata = {
   title: 'بدر الصيوان للعقارات | إدارة العقارات والتحصيل',
