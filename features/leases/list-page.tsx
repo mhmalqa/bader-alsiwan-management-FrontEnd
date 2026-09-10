@@ -1,0 +1,4 @@
+import Link from 'next/link'
+import { DataTable } from '@/components/shared/data-table'
+import { leases } from '@/mocks/data'
+export function LeasesListPage() { return <div className="content"><div className="module-title"><div><span className="overline">العقود والتحصيل</span><h1>عقود الإيجار</h1><p>العقود المرتبطة بالمستأجر والعقار والوحدة وجدول الأقساط.</p></div><Link className="add-button" href="/leases/new">إضافة عقد إيجار</Link></div><DataTable rows={leases} columns={[{ key: 'internalContractNumber', title: 'رقم العقد الداخلي' }, { key: 'ejarContractNumber', title: 'رقم عقد إيجار' }, { key: 'tenantId', title: 'المستأجر' }, { key: 'propertyId', title: 'العقار' }, { key: 'unitId', title: 'الوحدة' }, { key: 'startDate', title: 'تاريخ البداية' }, { key: 'endDate', title: 'تاريخ النهاية' }, { key: 'totalContractValue', title: 'إجمالي العقد' }, { key: 'status', title: 'الحالة' }]} /></div> }

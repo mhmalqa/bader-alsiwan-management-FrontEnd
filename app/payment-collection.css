@@ -1,0 +1,22 @@
+.page-stack{width:100%;padding:34px 38px 45px;display:grid;gap:20px}
+.module-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:22px 24px;border:1px solid #dfeae2;border-radius:14px;background:linear-gradient(105deg,#fff,#f1f9f3);box-shadow:0 7px 20px rgba(17,62,40,.045)}
+.module-header h1{margin:6px 0 7px;color:#183c2a;font-size:27px;line-height:1.2}.module-header p{margin:0;color:#64736a;font-size:14px;line-height:1.7}.module-header .eyebrow{color:#168052;font-size:12px;font-weight:700;display:inline-flex;gap:6px;align-items:center}.module-header .add-button{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.collection-header { align-items: center; }
+.collection-explainer { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 13px 18px; border: 1px solid #dbe9e0; border-radius: 14px; background: #f8fcf9; color: #456153; font-size: .88rem; }
+.explainer-step { padding: 6px 10px; border-radius: 8px; }
+.explainer-step.highlighted { color: #075f3b; background: #e5f5eb; font-weight: 700; }
+.collection-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.collection-kpi{position:relative;isolation:isolate;min-height:156px;display:flex;align-items:flex-start;gap:15px;overflow:hidden;padding:22px 20px;border:1px solid #e1ebe4;border-radius:16px;background:#fff;box-shadow:0 10px 26px rgba(18,62,42,.055);transition:transform .18s,box-shadow .18s}
+.collection-kpi:before{content:'';position:absolute;z-index:-1;inset:auto -34px -42px auto;width:132px;height:132px;border-radius:50%;background:var(--kpi-soft);opacity:.85}.collection-kpi:hover{transform:translateY(-3px);box-shadow:0 16px 32px rgba(18,62,42,.11)}
+.kpi-icon{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;border-radius:13px;color:var(--kpi-strong);background:var(--kpi-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--kpi-strong) 14%,transparent)}
+.kpi-copy{display:grid;gap:5px;min-width:0}.kpi-copy>span{font-size:13px;font-weight:700;color:#51685a;line-height:1.4}.kpi-copy strong{color:#153d2b;font-size:25px;letter-spacing:-.5px;line-height:1.25;white-space:nowrap}.kpi-copy small{color:#77877d;font-size:12px;line-height:1.55}.kpi-trend{position:absolute;left:17px;bottom:15px;display:inline-flex;align-items:center;gap:4px;border-radius:99px;padding:5px 8px;background:rgba(255,255,255,.78);color:var(--kpi-strong);font-size:11px;font-weight:700;border:1px solid color-mix(in srgb,var(--kpi-strong) 13%,transparent)}
+.collections-total{--kpi-strong:#08774a;--kpi-soft:#e2f5e9}.collections-confirmed{--kpi-strong:#23707f;--kpi-soft:#e3f2f4}.collections-reversed{--kpi-strong:#a2682e;--kpi-soft:#fbf0e1}
+.payment-reversal { display: grid; gap: 17px; padding: 20px 22px 22px; }
+.reversal-summary, .payment-context { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px; border-radius: 10px; background: #f2f8f4; color: #385545; }
+.payment-reversal label, .payment-entry-form label { display: grid; gap: 8px; font-weight: 700; color: #214b37; }
+.payment-reversal em { color: #d14343; font-style: normal; }
+.payment-reversal textarea { min-height: 90px; resize: vertical; padding: 10px; border: 1px solid #cbded2; border-radius: 9px; font: inherit; }
+.payment-entry-form { display: grid; gap: 18px; max-width: 920px; }
+.payment-entry-form input, .payment-entry-form select { min-height: 44px; padding: 0 12px; border: 1px solid #cbded2; border-radius: 9px; background: #fff; font: inherit; }
+.form-success { display: flex; align-items: center; gap: 8px; color: #087b4c; font-weight: 700; }
+@media (max-width:1050px){.collection-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.collection-kpi:last-child{grid-column:1 / -1}}@media (max-width:760px) { .page-stack{padding:22px 15px 32px;gap:14px}.module-header{padding:17px;flex-direction:column}.module-header h1{font-size:23px}.collection-explainer { align-items: stretch; flex-direction: column; text-align: center; gap: 3px; } .collection-explainer > span:not(.explainer-step) { transform: rotate(90deg); } .collection-stats { grid-template-columns:1fr;gap:11px }.collection-kpi{min-height:135px;padding:18px 16px}.collection-kpi:last-child{grid-column:auto}.kpi-copy strong{font-size:23px} }

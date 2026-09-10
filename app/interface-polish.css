@@ -1,0 +1,46 @@
+/* ثبات شريط التنقل: لا يتأثر طول النص أو حالة التحويم بعرضه. */
+.app-sidebar{width:272px;min-width:272px;max-width:272px;flex:0 0 272px;overflow-x:hidden;contain:layout paint}
+/* يمنع أي صفحة واسعة (وخاصة جداول التحصيل) من دفع الشريط الجانبي خارج نافذة العرض. */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+/* لا يوضع overflow على غلاف التطبيق؛ لأنه يلغي position: sticky للرأس والقوائم. */
+.app-shell{display:block;width:100%;max-width:100vw;overflow:visible}
+.app-sidebar{position:fixed;inset:0 0 auto auto;z-index:40;height:100dvh;overflow-y:auto;overscroll-behavior:contain}
+.app-main{width:calc(100% - 272px);max-width:calc(100% - 272px);min-width:0;margin-right:272px;overflow:visible}
+.app-header{position:sticky;top:0;z-index:30}
+.app-main>.page-stack,.app-main>.content{width:100%;max-width:100%;min-width:0}
+.payment-collection,.payment-collection>*{min-width:0;max-width:100%}
+.payment-collection .table-card{width:100%;overflow:hidden}
+.payment-collection .table-wrap{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
+/* الأزرار داخل البطاقات تحافظ على حجمها الطبيعي؛ الامتداد الكامل يكون فقط بفئة مقصودة. */
+.card>.add-button,.card>.cancel-button,.property-profile .card>.add-button{display:inline-flex;width:max-content;align-items:center;justify-content:center}
+@media(max-width:800px){.app-shell{overflow:visible}.app-sidebar{position:fixed}.app-main{width:100%;max-width:100%;margin-right:0;overflow-x:hidden}.app-header{position:sticky}}
+.brand-lockup{min-width:0;align-items:center}
+.app-sidebar .brand-image{width:126px!important;height:44px!important;max-width:126px;object-fit:contain;padding:4px;border-radius:9px}
+.tree-navigation,.nav-tree,.nav-group-trigger,.nav-children,.nav-children a{min-width:0;max-width:100%;box-sizing:border-box}
+.nav-group-trigger,.nav-children a{overflow:hidden;transform:none!important}
+.nav-group-trigger span,.nav-children a>span:last-of-type{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-children a:hover,.nav-group-trigger:hover{width:100%;transform:none!important}
+
+/* قراءة الجداول بوضوح في الشاشات المكتبية. */
+.table-card .table-wrap table{font-size:14px}
+.table-card .table-wrap th{font-size:14px;line-height:1.55;padding:15px 17px}
+.table-card .table-wrap td{font-size:14px;line-height:1.65;padding:15px 17px}
+.table-card .table-search input,.table-card .table-toolbar,.table-card .pagination{font-size:14px}
+
+/* بطاقات التشغيل والتسوية تتوزع على كامل المساحة بلا فراغات غير مقصودة. */
+.operations-list{display:grid;gap:14px;align-items:start}
+.operation-card{display:grid;align-content:start;min-height:0;gap:15px;padding:19px;border:1px solid #e3ece5;border-radius:12px;background:#fcfefc}
+.operation-card p{margin:0;color:#64736a;line-height:1.7}
+.operation-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
+.operation-heading h2{margin:8px 0 5px;font-size:18px;color:#173d2a}.operation-heading>strong{color:#0d6d43;font-size:17px;white-space:nowrap}
+.operation-card dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0}.operation-card dl>div{padding:11px 12px;border-radius:9px;background:#f3f8f4}.operation-card dt{font-size:12px;color:#65756b}.operation-card dd{margin:5px 0 0;color:#1e3d2c;font-weight:700;font-size:14px}
+.operation-card .inline-actions{display:flex;align-items:center;justify-content:flex-start;gap:9px;margin-top:2px}.operation-card .inline-actions .add-button,.operation-card .inline-actions .cancel-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:38px;white-space:nowrap}
+.settlement-breakdown{width:100%;max-width:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 26px}.settlement-breakdown>div{padding:15px 4px}.settlement-breakdown>div:last-child:nth-child(odd){grid-column:1 / -1}
+
+/* النوافذ المتخصصة قصيرة الهيدر وواضحة الأقسام. */
+.app-dialog:has(.specialized-modal-form){width:min(900px,calc(100vw - 32px));max-height:min(88vh,790px);overflow:auto}.app-dialog:has(.specialized-modal-form)>header{padding:18px 24px}.app-dialog:has(.specialized-modal-form)>header h2{font-size:21px}.app-dialog:has(.specialized-modal-form)>header p{font-size:13px;margin-top:4px}
+.specialized-modal-form{display:grid;gap:16px;padding:20px 24px 24px}.modal-form-section{display:grid;gap:13px}.modal-form-section h3{margin:0;color:#126b43;font-size:15px}.modal-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 16px}.modal-form-grid label{display:block;color:#234934;font-size:13px;font-weight:700;line-height:1.45}.modal-form-grid input,.modal-form-grid select{display:block;width:100%;height:43px;margin-top:7px;border:1px solid #cfdfd3;border-radius:9px;background:#fff;padding:0 12px;font:inherit;color:#1e3929}.modal-form-grid input:focus,.modal-form-grid select:focus{outline:3px solid #d9f0e0;border-color:#198c57}.modal-form-grid select:disabled{background:#f2f5f2;color:#87948b}.modal-form-grid em{display:inline;color:#d73737;font-style:normal;margin-inline-start:3px}.settlement-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.settlement-summary span{display:flex;justify-content:space-between;gap:10px;padding:12px;border-radius:9px;background:#eef7f0;color:#42604b;font-size:13px}.settlement-summary b{color:#087044}.specialized-modal-form .modal-actions{justify-content:flex-start;margin:2px 0 0;padding:16px 0 0;border-top:1px solid #e6eee8}.specialized-modal-form .modal-actions button{min-width:116px}
+@media(max-width:700px){.app-sidebar{width:272px;min-width:272px}.modal-form-grid,.settlement-summary,.operation-card dl,.settlement-breakdown{grid-template-columns:1fr}.app-dialog:has(.specialized-modal-form)>header,.specialized-modal-form{padding-inline:17px}.operation-heading{flex-direction:column}.settlement-breakdown>div:last-child:nth-child(odd){grid-column:auto}}
+
+/* ملف العقار: لوحة معلومات واضحة تربط التشغيل والتحصيل بالموقع. */
+.property-profile .stats .stat{min-height:120px}.property-profile .detail-tabs{padding:6px;border-radius:13px;background:#fff;box-shadow:0 6px 20px rgba(18,62,42,.05);width:max-content;max-width:100%}.property-profile .detail-tabs button{font-weight:700}.property-profile .card{overflow:hidden}.property-profile .card>h2{margin:0 0 12px;color:#173f2b;font-size:17px}.property-profile .summary-row{padding:15px 4px}.property-profile .summary-row:hover{background:#f5faf6}.property-profile .summary-row b{font-size:14px;color:#1c422e}.property-profile .summary-row span{font-size:13px}.property-profile .page-actions{margin-top:16px}.property-profile .page-actions .add-button,.property-profile .page-actions .cancel-button{display:inline-flex;align-items:center;justify-content:center;min-width:124px;height:40px}.property-profile .map-card{background:linear-gradient(145deg,#fff,#f5fbf6)}.property-profile .map-card iframe{border:1px solid #dce9df}.property-profile .coordinates{padding:9px 11px;border-radius:8px;background:#edf6ef;justify-content:space-between}.property-profile .financial-list{padding-top:2px}.owner-profile-action,.property-profile-action{white-space:nowrap;font-weight:700}

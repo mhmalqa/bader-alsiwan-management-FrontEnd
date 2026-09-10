@@ -1,0 +1,3 @@
+export function LoadingState({ label = 'جارٍ تحميل البيانات...' }: { label?: string }) { return <div className="state-card loading-state" role="status"><i /><i /><i /><span>{label}</span></div> }
+export function EmptyState({ title, description, action }: { title: string; description: string; action?: React.ReactNode }) { return <div className="state-card"><h2>{title}</h2><p>{description}</p>{action}</div> }
+export function ErrorState({ message, onRetry }: { message?: string; onRetry?: () => void }) { return <div className="state-card error-state"><h2>تعذر تحميل البيانات</h2><p>{message ?? 'حدث خطأ مؤقت. يرجى المحاولة مرة أخرى.'}</p>{onRetry && <button className="cancel-button" onClick={onRetry}>إعادة المحاولة</button>}</div> }

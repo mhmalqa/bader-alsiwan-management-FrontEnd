@@ -1,0 +1,4 @@
+import Link from 'next/link'
+import { DataTable } from '@/components/shared/data-table'
+import { managementContracts } from '@/mocks/data'
+export function ManagementContractsListPage() { return <div className="content"><div className="module-title"><div><span className="overline">علاقة الإدارة</span><h1>عقود الإدارة</h1><p>اتفاقيات إدارة الأملاك ورسوم الإدارة ومدة العقد.</p></div><Link className="add-button" href="/management-contracts/new">إضافة عقد إدارة</Link></div><DataTable rows={managementContracts} columns={[{ key: 'contractNumber', title: 'رقم العقد' }, { key: 'ownerId', title: 'المالك' }, { key: 'startDate', title: 'تاريخ البداية' }, { key: 'endDate', title: 'تاريخ النهاية' }, { key: 'managementFeeMethod', title: 'طريقة الاحتساب' }, { key: 'managementFeePercentage', title: 'نسبة الإدارة' }, { key: 'status', title: 'الحالة' }]} /></div> }

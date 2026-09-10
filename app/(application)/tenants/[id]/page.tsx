@@ -1,0 +1,1 @@
+import { TenantDetailsPage } from '@/features/tenants/pages'; export default async function Page({ params }: { params: Promise<{ id: string }> }) { return <TenantDetailsPage id={(await params).id} /> }

@@ -1,0 +1,2 @@
+/* المجموعة النشطة لا تفرض الفتح؛ المستخدم يتحكم بالطي والفتح. */
+.nav-tree.contains-active .nav-children{display:none}.nav-tree.contains-active .nav-group-trigger>svg:last-child{transform:rotate(0)}.nav-tree.expanded .nav-children{display:grid}.nav-tree.expanded .nav-group-trigger>svg:last-child{transform:rotate(180deg)}

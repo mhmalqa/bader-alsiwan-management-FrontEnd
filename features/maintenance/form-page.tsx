@@ -1,0 +1,9 @@
+'use client'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver as resolveZod } from '@hookform/resolvers/zod'
+import { maintenanceSchema } from '@/schemas'
+import { AttachmentUploader, type LocalAttachment } from '@/components/shared/attachment-uploader'
+function zodResolver(schema: unknown): never { return resolveZod(schema as never) as never }
+type MaintenanceForm = { unitId: string; title: string; estimatedCost: number; description: string; requiresOwnerApproval: boolean }
+export function MaintenanceFormPage() { const form = useForm<MaintenanceForm>({ resolver: zodResolver(maintenanceSchema), defaultValues: { unitId: '1', title: '', estimatedCost: 0, description: '', requiresOwnerApproval: true } }); const [attachments, setAttachments] = useState<LocalAttachment[]>([]); return <div className="content"><div className="module-title"><div><span className="overline">طلب جديد</span><h1>تسجيل طلب صيانة</h1><p>يتم طلب اعتماد المالك عند تجاوز الحد المحدد في عقد الإدارة.</p></div></div><form className="card entity-form" onSubmit={form.handleSubmit(() => undefined)}><label>الوحدة<select {...form.register('unitId')}><option value="1">مكتب 203</option></select></label><label>عنوان الطلب<input {...form.register('title')} /></label><label>التكلفة التقديرية<input type="number" {...form.register('estimatedCost', { valueAsNumber: true })} /></label><label className="checkbox"><input type="checkbox" {...form.register('requiresOwnerApproval')} /> يتطلب اعتماد المالك</label><label className="full-width">الوصف<textarea {...form.register('description')} /></label><div className="full-width"><AttachmentUploader value={attachments} onChange={setAttachments} /></div><div className="form-actions"><button className="add-button" type="submit">حفظ الطلب</button></div></form></div> }

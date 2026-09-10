@@ -1,0 +1,4 @@
+import Link from 'next/link'
+import { DataTable } from '@/components/shared/data-table'
+import { expenses } from '@/mocks/data'
+export function ExpensesListPage() { return <div className="content"><div className="module-title"><div><span className="overline">المالية والتشغيل</span><h1>المصروفات</h1><p>مصروفات العقار والمورد والفواتير والمبالغ القابلة للتحميل على المالك.</p></div><Link className="add-button" href="/expenses/new">إضافة مصروف</Link></div><DataTable rows={expenses} columns={[{ key: 'propertyId', title: 'العقار' }, { key: 'unitId', title: 'الوحدة' }, { key: 'description', title: 'البيان' }, { key: 'category', title: 'الفئة' }, { key: 'vendorName', title: 'المورد' }, { key: 'amount', title: 'المبلغ' }, { key: 'expenseDate', title: 'تاريخ المصروف' }, { key: 'approvalStatus', title: 'حالة الاعتماد' }]} /></div> }

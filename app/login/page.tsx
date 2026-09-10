@@ -1,0 +1,5 @@
+'use client'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useState } from 'react'
+export default function LoginPage() { const [submitted, setSubmitted] = useState(false); return <main className="login-page" dir="rtl"><section className="login-card"><div className="brand-lockup"><Image src="/logo.png" alt="بدر الصيوان للعقارات" width={210} height={70} priority className="brand-image" /></div><h1>تسجيل دخول الموظفين</h1><p>استخدم حساب فريق العمل للدخول إلى نظام الإدارة.</p><form onSubmit={(event) => { event.preventDefault(); setSubmitted(true) }} className="stack-form"><label>اسم المستخدم أو البريد الإلكتروني<input required name="usernameOrEmail" placeholder="name@bader.sa" /></label><label>كلمة المرور<input required name="password" type="password" placeholder="••••••••" /></label><label className="checkbox"><input type="checkbox" name="rememberMe" /> تذكرني</label><button className="add-button" type="submit">تسجيل الدخول</button></form>{submitted && <p className="success-message">تم بدء جلسة تجريبية. <Link href="/dashboard">الانتقال للوحة التحكم</Link></p>}</section></main> }

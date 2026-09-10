@@ -1,0 +1,1 @@
+import { SettlementDetailPage } from '@/features/settlements/pages'; export default async function Page({ params }: { params: Promise<{ id: string }> }) { return <SettlementDetailPage id={(await params).id} /> }

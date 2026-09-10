@@ -1,0 +1,1 @@
+import { MaintenanceDetailPage } from '@/features/maintenance/pages'; export default async function Page({ params }: { params: Promise<{ id: string }> }) { return <MaintenanceDetailPage id={(await params).id} /> }
