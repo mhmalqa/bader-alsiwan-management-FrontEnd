@@ -2,7 +2,12 @@
 
 import { ArrowDownUp, ChevronDown, Search, SlidersHorizontal, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { leases, owners, properties, tenants, units } from '@/mocks/data'
+// Relationship labels are supplied by API view models; this generic table never reads local fixtures.
+const leases: { id: string; internalContractNumber: string }[] = []
+const owners: { id: string; fullName: string }[] = []
+const properties: { id: string; propertyName: string }[] = []
+const tenants: { id: string; fullName: string }[] = []
+const units: { id: string; unitNameOrNumber: string }[] = []
 
 const statuses: Record<string, string> = { active: 'نشط', inactive: 'غير نشط', archived: 'مؤرشف', draft: 'مسودة', confirmed: 'مؤكد', cancelled: 'ملغي', vacant: 'شاغرة', occupied: 'مؤجرة', reserved: 'محجوزة', maintenance: 'صيانة', unavailable: 'غير متاحة', expired: 'منتهي', terminated: 'منهى', renewed: 'مجدد', upcoming: 'قادم', due_soon: 'مستحق قريبًا', due_today: 'مستحق اليوم', partially_paid: 'مدفوع جزئيًا', paid: 'مدفوع', overdue: 'متأخر', reversed: 'ملغاة' }
 const methods: Record<string, string> = { annual: 'سنوي', semi_annual: 'نصف سنوي', quarterly: 'ربع سنوي', monthly: 'شهري', one_time: 'دفعة واحدة', custom: 'مخصص', bank_transfer: 'تحويل بنكي', cash: 'نقدي', cheque: 'شيك', card: 'بطاقة', percentage_of_collections: 'نسبة من التحصيل' }

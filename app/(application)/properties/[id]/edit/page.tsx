@@ -1,1 +1,1 @@
-import { RecordFormPage } from '@/features/shared/components/record-pages'; export default async function Page({ params }: { params: Promise<{ id: string }> }) { return <RecordFormPage entity="properties" id={(await params).id} /> }
+import { PropertyFormPage } from '@/features/properties/form-page'; export default async function Page({ params }: { params: Promise<{ id: string }> }) { return <PropertyFormPage id={(await params).id} /> }

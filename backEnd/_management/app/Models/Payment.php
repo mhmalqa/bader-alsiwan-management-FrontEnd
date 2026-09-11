@@ -1,0 +1,2 @@
+<?php
+namespace App\Models;use Illuminate\Database\Eloquent\Model;use Illuminate\Database\Eloquent\Relations\HasMany;class Payment extends Model{protected $keyType='string';public $incrementing=false;protected $fillable=['id','organization_id','number','tenant_id','receipt_date','posting_date','method','amount','currency','transaction_reference','status','idempotency_key','request_fingerprint','created_by'];public function allocations():HasMany{return $this->hasMany(PaymentAllocation::class);}}

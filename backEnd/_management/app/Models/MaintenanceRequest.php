@@ -1,0 +1,2 @@
+<?php
+namespace App\Models; use Illuminate\Database\Eloquent\Model; class MaintenanceRequest extends Model {protected $keyType='string';public $incrementing=false;protected $fillable=['id','organization_id','property_id','space_id','owner_id','title','description','priority','estimated_cost','actual_cost','requires_owner_approval','approval_status','status','version'];protected $casts=['requires_owner_approval'=>'boolean'];}

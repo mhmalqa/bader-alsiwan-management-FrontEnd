@@ -1,0 +1,2 @@
+<?php
+namespace App\Models;use Illuminate\Database\Eloquent\Model;class OwnerSettlement extends Model{protected $keyType='string';public $incrementing=false;protected $fillable=['id','organization_id','owner_id','number','period_start','period_end','gross_collections','management_fees','owner_expenses','adjustments','net_due','transfer_amount','remaining_balance','status','idempotency_key','request_fingerprint','confirmed_by','confirmed_at'];}

@@ -1,0 +1,2 @@
+<?php
+namespace App\Models; use Illuminate\Database\Eloquent\Model; class Expense extends Model {protected $keyType='string';public $incrementing=false;protected $fillable=['id','organization_id','property_id','space_id','owner_id','vendor_id','vendor_name','description','category','net_amount','vat_amount','gross_amount','expense_date','invoice_number','chargeable_to_owner','approval_status','status','version'];protected $casts=['chargeable_to_owner'=>'boolean'];}

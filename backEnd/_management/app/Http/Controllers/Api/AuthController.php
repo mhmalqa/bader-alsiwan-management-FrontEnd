@@ -15,8 +15,8 @@ class AuthController extends Controller
 {
     public function login(Request $request): JsonResponse
     {
-        $input = $request->validate(['email' => ['required', 'email'], 'password' => ['required', 'string'], 'organizationId' => ['required', 'uuid']]);
-        $user = User::query()->where('organization_id', $input['organizationId'])->where('email', $input['email'])->first();
+        $input = $request->validate(['email' => ['required', 'email'], 'password' => ['required', 'string'], 'organizationId' => ['nullable', 'uuid']]);
+        $user = User::query()->when($input['organizationId'] ?? null, fn ($query, $organizationId) => $query->where('organization_id', $organizationId))->where('email', $input['email'])->first();
         if (! $user || ! Hash::check($input['password'], $user->password) || $user->status !== 'active') {
             return response()->json(['errors' => [['code' => 'invalid_credentials', 'message' => 'بيانات تسجيل الدخول غير صحيحة.']]], 422);
         }

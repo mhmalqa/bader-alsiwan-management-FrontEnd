@@ -1,34 +1,6 @@
 'use client'
-
-import { useId } from 'react'
-import { attachmentsData } from '@/mocks/attachments-data'
-import type { Attachment } from '@/types/domain'
-import { logAudit } from '@/services/frontend-store'
-
-export interface LocalAttachment { id: string; name: string; size: number; category?: string }
-type Props = { value: LocalAttachment[]; onChange: (items: LocalAttachment[]) => void; entityType?: string; entityId?: string; category?: string }
-
-/**
- * Keeps attachment metadata in the shared Mock store. The browser File object is
- * intentionally not retained: the backend will replace this with object storage.
- */
-export function AttachmentUploader({ value, onChange, entityType = 'draft', entityId = 'new', category = 'مرفق' }: Props) {
-  const inputId = useId()
-  const add = (files: File[]) => {
-    const created: LocalAttachment[] = files.map((file) => {
-      if (entityId === 'new' || entityId === 'draft') throw new Error('احفظ السجل أولاً، ثم أضف المرفق ليرتبط بسجل موثق.')
-      const id = `ATT-${crypto.randomUUID()}`
-      const record: Attachment = { id, name: file.name, category, uploadedAt: new Date().toISOString(), mimeType: file.type || 'application/octet-stream', size: file.size, relatedEntityType: entityType, relatedEntityId: entityId, uploadedBy: 'مدير النظام' }
-      attachmentsData.push(record)
-      logAudit('إرفاق', 'مرفق', id, `${file.name} مرتبط بـ ${entityType}/${entityId}`)
-      return { id, name: file.name, size: file.size, category }
-    })
-    onChange([...value, ...created])
-  }
-  const remove = (id: string) => {
-    const index = attachmentsData.findIndex((item) => item.id === id)
-    if (index >= 0) attachmentsData.splice(index, 1)
-    onChange(value.filter((entry) => entry.id !== id))
-  }
-  return <section className="attachment-uploader"><label htmlFor={inputId}>المرفقات</label><input id={inputId} type="file" multiple onChange={(event) => { add(Array.from(event.target.files ?? [])); event.currentTarget.value = '' }} /><small>يُحفظ وصف الملف ونطاقه في بيانات Mock الموحدة؛ وسيُرفع الملف الفعلي إلى خدمة التخزين عند ربط الخلفية.</small>{value.map((item) => <div className="attachment-item" key={item.id}><span>{item.name}</span><button type="button" onClick={() => remove(item.id)}>إزالة</button></div>)}</section>
-}
+import {useId,useState}from 'react'
+import {api} from '@/lib/api/http'
+export interface LocalAttachment{id:string;name:string;size:number;category?:string}
+type Props={value:LocalAttachment[];onChange:(items:LocalAttachment[])=>void;entityType?:string;entityId?:string;category?:string}
+export function AttachmentUploader({value,onChange,entityType='draft',entityId='new',category='مرفق'}:Props){const inputId=useId(),[error,setError]=useState(''),[uploading,setUploading]=useState(false);const add=async(files:File[])=>{if(entityId==='new'||entityId==='draft'){setError('احفظ السجل أولاً ثم أضف المرفقات.');return}setUploading(true);setError('');try{const added:LocalAttachment[]=[];for(const file of files){const presign=await api<{attachmentId:string;storageKey:string;uploadUrl:string}>('/attachments/presign',{method:'POST',body:JSON.stringify({filename:file.name,mimeType:file.type||'application/octet-stream',bytes:file.size,entityType})});const base=process.env.NEXT_PUBLIC_API_URL??'/api/backend/v1';const response=await fetch(`${base}/attachments/${presign.attachmentId}/upload`,{method:'POST',headers:{Authorization:`Bearer ${sessionStorage.getItem('accessToken')??''}`},body:(()=>{const body=new FormData();body.append('file',file);return body})()});if(!response.ok)throw new Error((await response.json().catch(()=>({}))).errors?.[0]?.message??'تعذر رفع الملف.');await api('/attachments/complete',{method:'POST',body:JSON.stringify({attachmentId:presign.attachmentId,storageKey:presign.storageKey,entityType,entityId})});added.push({id:presign.attachmentId,name:file.name,size:file.size,category})}onChange([...value,...added])}catch(e){setError(e instanceof Error?e.message:'تعذر رفع المرفق.')}finally{setUploading(false)}};return <section className="attachment-uploader"><label htmlFor={inputId}>المرفقات</label><input id={inputId} type="file" multiple disabled={uploading} onChange={e=>{void add(Array.from(e.target.files??[]));e.currentTarget.value=''}}/>{uploading&&<small>جارٍ رفع المرفق…</small>}{error&&<small className="error-message">{error}</small>}{value.map(item=><div className="attachment-item" key={item.id}><span>{item.name}</span><button type="button" onClick={()=>onChange(value.filter(x=>x.id!==item.id))}>إزالة</button></div>)}</section>}

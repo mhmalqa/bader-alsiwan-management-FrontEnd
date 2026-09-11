@@ -1,1 +1,3 @@
-import { RecordFormPage } from '@/features/shared/components/record-pages'; export default function Page() { return <RecordFormPage entity="owners" /> }
+import { OwnerFormPage } from '@/features/owners/form-page'
+
+export default function Page() { return <OwnerFormPage /> }

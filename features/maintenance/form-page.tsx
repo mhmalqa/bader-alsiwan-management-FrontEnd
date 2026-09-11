@@ -1,30 +1,6 @@
 'use client'
-
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { maintenanceSchema } from '@/schemas'
-import { AttachmentUploader, type LocalAttachment } from '@/components/shared/attachment-uploader'
-import { properties, units } from '@/mocks/data'
-import { createQuickRecord } from '@/services/quick-create'
-import { notifySuccess } from '@/components/shared/app-toast'
-
-type MaintenanceForm = { propertyId: string; unitId: string; title: string; estimatedCost: number; description: string; requiresOwnerApproval: boolean; priority: string }
-
-export function MaintenanceFormPage() {
-  const form = useForm<MaintenanceForm>({ resolver: zodResolver(maintenanceSchema) as never, defaultValues: { propertyId: properties[0]?.id ?? '', unitId: units[0]?.id ?? '', title: '', estimatedCost: 0, description: '', requiresOwnerApproval: true, priority: 'متوسطة' } })
-  const [attachments, setAttachments] = useState<LocalAttachment[]>([])
-  const [savedId, setSavedId] = useState<string>()
-  const [error, setError] = useState('')
-  const [propertyId, setPropertyId] = useState(properties[0]?.id ?? '')
-  const availableUnits = units.filter((unit) => unit.propertyId === propertyId)
-  const save = async (values: MaintenanceForm) => {
-    try {
-      const record = await createQuickRecord('maintenance', { ...Object.fromEntries(Object.entries(values).map(([key, value]) => [key, String(value)])), requiresOwnerApproval: values.requiresOwnerApproval ? 'نعم' : 'لا' })
-      setSavedId(record.id)
-      setError('')
-      notifySuccess({ title: 'تم تسجيل طلب الصيانة', description: 'أصبح الطلب موثقاً وجاهزاً لمسار الاعتماد.' })
-    } catch (reason) { setError(reason instanceof Error ? reason.message : 'تعذر حفظ طلب الصيانة.') }
-  }
-  return <div className="content"><div className="module-title"><div><span className="overline">طلب جديد</span><h1>تسجيل طلب صيانة</h1><p>يُنشأ الطلب ثم تُرفع المرفقات على السجل الموثق، ويبدأ الاعتماد عند الحاجة.</p></div></div><form className="card entity-form" onSubmit={form.handleSubmit(save)}><label>العقار<select {...form.register('propertyId')} onChange={(event) => { setPropertyId(event.target.value); form.setValue('propertyId', event.target.value); form.setValue('unitId', units.find((unit) => unit.propertyId === event.target.value)?.id ?? '') }}>{properties.map((property) => <option key={property.id} value={property.id}>{property.propertyName}</option>)}</select></label><label>الوحدة<select {...form.register('unitId')}>{availableUnits.map((unit) => <option key={unit.id} value={unit.id}>{unit.unitNameOrNumber}</option>)}</select></label><label>عنوان الطلب<input {...form.register('title')} /></label><label>الأولوية<select {...form.register('priority')}><option>منخفضة</option><option>متوسطة</option><option>عالية</option><option>طارئة</option></select></label><label>التكلفة التقديرية<input type="number" min="0" {...form.register('estimatedCost', { valueAsNumber: true })} /></label><label className="checkbox"><input type="checkbox" {...form.register('requiresOwnerApproval')} /> يتطلب اعتماد المالك</label><label className="full-width">الوصف<textarea {...form.register('description')} /></label><div className="full-width"><AttachmentUploader value={attachments} onChange={setAttachments} entityType="maintenance_request" entityId={savedId ?? 'new'} category="مرفق طلب صيانة" /></div>{error && <p className="error-message full-width">{error}</p>}<div className="form-actions"><button className="add-button" type="submit">{savedId ? 'حفظ طلب آخر' : 'حفظ الطلب'}</button></div></form></div>
-}
+import { useEffect,useState } from 'react'
+import { listProperties,type Property,type PropertySpace } from '@/features/properties/api'
+import { api } from '@/lib/api/http'
+import { createMaintenance } from './api'
+export function MaintenanceFormPage(){const[properties,setProperties]=useState<Property[]>([]),[spaces,setSpaces]=useState<PropertySpace[]>([]),[propertyId,setPropertyId]=useState(''),[spaceId,setSpaceId]=useState(''),[title,setTitle]=useState(''),[description,setDescription]=useState(''),[priority,setPriority]=useState<'low'|'medium'|'high'|'urgent'>('medium'),[cost,setCost]=useState('0'),[approval,setApproval]=useState(true),[error,setError]=useState(''),[notice,setNotice]=useState(''),[saving,setSaving]=useState(false);useEffect(()=>{const t=window.setTimeout(()=>{void(async()=>{try{const[p,s]=await Promise.all([listProperties(),api<{items:PropertySpace[]}>('/property-spaces')]);setProperties(p.items);setSpaces(s.items);setPropertyId(p.items[0]?.id??'')}catch(e){setError(e instanceof Error?e.message:'تعذر تحميل خيارات النموذج.')}})()},0);return()=>clearTimeout(t)},[]);const save=async(e:React.FormEvent)=>{e.preventDefault();setSaving(true);setError('');try{await createMaintenance({propertyId,spaceId:spaceId||undefined,title,description:description||undefined,priority,estimatedCost:Number(cost),requiresOwnerApproval:approval});setNotice('تم تسجيل طلب الصيانة بنجاح.');setTitle('');setDescription('');setSpaceId('')}catch(c){setError(c instanceof Error?c.message:'تعذر حفظ الطلب.')}finally{setSaving(false)}};const related=spaces.filter(x=>x.propertyId===propertyId);return <div className="content"><div className="module-title"><div><span className="overline">طلب جديد</span><h1>تسجيل طلب صيانة</h1><p>يحفظ الطلب على الخادم ثم يدخل مسار الاعتماد عند الحاجة.</p></div></div><form className="card entity-form" onSubmit={save}><label>العقار<select required value={propertyId} disabled={saving} onChange={e=>{setPropertyId(e.target.value);setSpaceId('')}}><option value="">اختر العقار</option>{properties.map(p=><option key={p.id} value={p.id}>{p.propertyName}</option>)}</select></label><label>الوحدة<select value={spaceId} disabled={saving} onChange={e=>setSpaceId(e.target.value)}><option value="">غير محددة</option>{related.map(s=><option key={s.id} value={s.id}>{s.unitNameOrNumber}</option>)}</select></label><label>عنوان الطلب<input required value={title} disabled={saving} onChange={e=>setTitle(e.target.value)}/></label><label>الأولوية<select value={priority} disabled={saving} onChange={e=>setPriority(e.target.value as typeof priority)}><option value="low">منخفضة</option><option value="medium">متوسطة</option><option value="high">عالية</option><option value="urgent">طارئة</option></select></label><label>التكلفة التقديرية<input required type="number" min="0" value={cost} disabled={saving} onChange={e=>setCost(e.target.value)}/></label><label className="checkbox"><input type="checkbox" checked={approval} disabled={saving} onChange={e=>setApproval(e.target.checked)}/> يتطلب اعتماد المالك</label><label className="full-width">الوصف<textarea value={description} disabled={saving} onChange={e=>setDescription(e.target.value)}/></label>{error&&<p className="error-message full-width">{error}</p>}{notice&&<p className="success-message full-width">{notice}</p>}<div className="form-actions"><button className="add-button" type="submit" disabled={saving||!propertyId||!title}>{saving?'جارٍ الحفظ…':'حفظ الطلب'}</button></div></form></div>}

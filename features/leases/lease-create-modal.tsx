@@ -1,56 +1,9 @@
 'use client'
-
-import { useMemo, useState } from 'react'
-import { AttachmentUploader, type LocalAttachment } from '@/components/shared/attachment-uploader'
+import { useEffect,useState } from 'react'
 import { AppDialog } from '@/components/shared/app-dialog'
-import { SearchableSelect } from '@/components/shared/searchable-select'
-import { properties, tenants, units } from '@/mocks/data'
-import { createQuickRecord } from '@/services/quick-create'
-
-type Props = { open: boolean; onClose: () => void }
-
-const frequencyOptions = [
-  ['annual', 'سنوي'], ['semi_annual', 'نصف سنوي'], ['quarterly', 'ربع سنوي'], ['monthly', 'شهري'], ['one_time', 'دفعة واحدة'], ['custom', 'مخصص'],
-] as const
-
-export function LeaseCreateModal({ open, onClose }: Props) {
-  const [values, setValues] = useState({ internalContractNumber: '', ejarContractNumber: '', tenantId: '', propertyId: '', unitId: '', leasedSpaceType: 'unit', leasedSpaceLabel: '', startDate: '', endDate: '', annualRent: '', paymentFrequency: 'annual', securityDeposit: '', noticePeriodDays: '' })
-  const [attachments, setAttachments] = useState<LocalAttachment[]>([])
-  const [saving, setSaving] = useState(false)
-  const [notice, setNotice] = useState('')
-  const availableUnits = useMemo(() => units.filter((unit) => !values.propertyId || unit.propertyId === values.propertyId), [values.propertyId])
-  const update = (key: keyof typeof values, value: string) => setValues((current) => ({ ...current, [key]: value, ...(key === 'propertyId' ? { unitId: '' } : {}) }))
-  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (!values.internalContractNumber || !values.tenantId || !values.propertyId || (values.leasedSpaceType === 'unit' && !values.unitId) || (values.leasedSpaceType === 'floor' && !values.leasedSpaceLabel) || !values.startDate || !values.endDate || !values.annualRent) return
-    setSaving(true)
-    await createQuickRecord('lease', values)
-    setSaving(false)
-    setNotice('تم حفظ عقد الإيجار وجدول أقساطه بنجاح.')
-  }
-  const close = () => { setNotice(''); onClose() }
-
-  return <AppDialog open={open} onClose={close} title="إضافة عقد إيجار" description="سجّل العقد، الطرف المؤجر، الوحدة ودورية التحصيل من نافذة واحدة.">
-    <form className="specialized-modal-form" onSubmit={submit}>
-      <section className="modal-form-section"><h3>بيانات العقد</h3><div className="modal-form-grid">
-        <label>رقم العقد الداخلي <em>*</em><input required value={values.internalContractNumber} onChange={(event) => update('internalContractNumber', event.target.value)} placeholder="مثال: L-2026-001" /></label>
-        <label>رقم عقد إيجار <input value={values.ejarContractNumber} onChange={(event) => update('ejarContractNumber', event.target.value)} placeholder="إن وجد" /></label>
-        <label>المستأجر <em>*</em><SearchableSelect required value={values.tenantId} onChange={(value) => update('tenantId', value)} options={tenants.map((tenant) => ({ value: tenant.id, label: tenant.fullName }))} placeholder="ابحث واختر المستأجر" /></label>
-        <label>العقار <em>*</em><SearchableSelect required value={values.propertyId} onChange={(value) => update('propertyId', value)} options={properties.map((property) => ({ value: property.id, label: property.propertyName }))} placeholder="ابحث واختر العقار" /></label>
-        <label>نطاق التأجير <em>*</em><select value={values.leasedSpaceType} onChange={(event) => update('leasedSpaceType', event.target.value)}><option value="unit">وحدة / شقة</option><option value="floor">دور كامل</option><option value="whole_property">العقار بالكامل</option></select></label>
-        {values.leasedSpaceType === 'unit' ? <label>الوحدة / الشقة <em>*</em><SearchableSelect required disabled={!values.propertyId} value={values.unitId} onChange={(value) => update('unitId', value)} options={availableUnits.map((unit) => ({ value: unit.id, label: unit.unitNameOrNumber }))} placeholder="ابحث واختر الوحدة" /></label> : values.leasedSpaceType === 'floor' ? <label>اسم أو رقم الدور <em>*</em><input required value={values.leasedSpaceLabel} onChange={(event) => update('leasedSpaceLabel', event.target.value)} placeholder="مثال: الدور الأول" /></label> : <label>المساحة المؤجرة<input readOnly value={properties.find((property) => property.id === values.propertyId)?.propertyName ?? 'اختر العقار أولاً'} /></label>}
-      </div></section>
-      <section className="modal-form-section"><h3>المدة والتحصيل</h3><div className="modal-form-grid">
-        <label>تاريخ بداية العقد <em>*</em><input required type="date" value={values.startDate} onChange={(event) => update('startDate', event.target.value)} /></label>
-        <label>تاريخ نهاية العقد <em>*</em><input required type="date" value={values.endDate} onChange={(event) => update('endDate', event.target.value)} /></label>
-        <label>قيمة الإيجار السنوي (ر.س) <em>*</em><input required min="1" type="number" value={values.annualRent} onChange={(event) => update('annualRent', event.target.value)} /></label>
-        <label>دورية السداد <em>*</em><select value={values.paymentFrequency} onChange={(event) => update('paymentFrequency', event.target.value)}>{frequencyOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-        <label>تأمين مسترد (ر.س)<input min="0" type="number" value={values.securityDeposit} onChange={(event) => update('securityDeposit', event.target.value)} /></label>
-        <label>فترة الإشعار (أيام)<input min="0" type="number" value={values.noticePeriodDays} onChange={(event) => update('noticePeriodDays', event.target.value)} /></label>
-      </div></section>
-      <section className="modal-form-section"><AttachmentUploader value={attachments} onChange={setAttachments} entityType="lease" category="عقد إيجار ومنصة إيجار" /></section>
-      {notice && <p className="success-message">{notice}</p>}
-      <footer className="modal-actions"><button type="button" className="cancel-button" onClick={close}>إلغاء</button><button className="add-button" type="submit" disabled={saving}>{saving ? 'جارٍ الحفظ...' : 'حفظ عقد الإيجار'}</button></footer>
-    </form>
-  </AppDialog>
-}
+import { listTenants,type Tenant } from '@/features/tenants/api'
+import { listProperties,type Property, type PropertySpace } from '@/features/properties/api'
+import { api } from '@/lib/api/http'
+import { createLease } from './api'
+type Props={open:boolean;onClose:()=>void}
+export function LeaseCreateModal({open,onClose}:Props){const [tenants,setTenants]=useState<Tenant[]>([]);const [properties,setProperties]=useState<Property[]>([]);const [spaces,setSpaces]=useState<PropertySpace[]>([]);const [v,setV]=useState({internalNumber:'',tenantId:'',propertyId:'',spaceId:'',startDate:'',endDate:'',annualRent:'',frequency:'annual'});const [saving,setSaving]=useState(false);const [error,setError]=useState('');useEffect(()=>{if(!open)return;void Promise.all([listTenants(),listProperties(),api<{items:PropertySpace[]}>('/property-spaces')]).then(([t,p,s])=>{setTenants(t.items);setProperties(p.items);setSpaces(s.items)}).catch(()=>setError('تعذر تحميل قوائم العقد.'))},[open]);const submit=async(e:React.FormEvent)=>{e.preventDefault();if(!v.spaceId)return;setSaving(true);setError('');try{await createLease({internalNumber:v.internalNumber,tenantId:v.tenantId,startDate:v.startDate,endDate:v.endDate,annualRent:Number(v.annualRent),totalValue:Number(v.annualRent),frequency:v.frequency,spaces:[{spaceId:v.spaceId,startDate:v.startDate,endDate:v.endDate}],installments:[{dueDate:v.startDate,amount:Number(v.annualRent)}]});onClose()}catch{setError('تعذر حفظ عقد الإيجار. تحقق من البيانات والصلاحية.')}finally{setSaving(false)}};return <AppDialog open={open} onClose={saving?()=>undefined:onClose} title="إضافة عقد إيجار" description="يحفظ العقد كمسودة ثم يفعّل من الخادم."><form className="specialized-modal-form" onSubmit={submit}><label>رقم العقد<input required disabled={saving} value={v.internalNumber} onChange={e=>setV({...v,internalNumber:e.target.value})}/></label><label>المستأجر<select required disabled={saving} value={v.tenantId} onChange={e=>setV({...v,tenantId:e.target.value})}><option value="">اختر</option>{tenants.map(t=><option key={t.id} value={t.id}>{t.fullName}</option>)}</select></label><label>العقار<select required disabled={saving} value={v.propertyId} onChange={e=>setV({...v,propertyId:e.target.value,spaceId:''})}><option value="">اختر</option>{properties.map(p=><option key={p.id} value={p.id}>{p.propertyName}</option>)}</select></label><label>المساحة<select required disabled={saving||!v.propertyId} value={v.spaceId} onChange={e=>setV({...v,spaceId:e.target.value})}><option value="">اختر</option>{spaces.filter(s=>s.propertyId===v.propertyId).map(s=><option key={s.id} value={s.id}>{s.unitNameOrNumber}</option>)}</select></label><label>البداية<input required disabled={saving} type="date" value={v.startDate} onChange={e=>setV({...v,startDate:e.target.value})}/></label><label>النهاية<input required disabled={saving} type="date" value={v.endDate} onChange={e=>setV({...v,endDate:e.target.value})}/></label><label>الإيجار السنوي<input required disabled={saving} min="1" type="number" value={v.annualRent} onChange={e=>setV({...v,annualRent:e.target.value})}/></label><label>الدورية<select disabled={saving} value={v.frequency} onChange={e=>setV({...v,frequency:e.target.value})}>{['annual','semi_annual','quarterly','monthly','one_time','custom'].map(x=><option key={x}>{x}</option>)}</select></label>{error&&<p role="alert" className="error-message">{error}</p>}<footer className="modal-actions"><button type="button" className="cancel-button" disabled={saving} onClick={onClose}>إلغاء</button><button className="add-button" disabled={saving} type="submit">{saving?'جارٍ الحفظ…':'حفظ عقد الإيجار'}</button></footer></form></AppDialog>}

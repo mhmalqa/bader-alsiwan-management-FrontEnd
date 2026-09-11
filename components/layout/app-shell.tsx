@@ -2,14 +2,9 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Bell, Building2, ChevronDown, ChevronLeft, FileBarChart, FileText, LayoutDashboard, Menu, Plus, Settings, Users, WalletCards, Wrench } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { hydrateFrontendData } from '@/services/frontend-store'
-import { CreateRecordModal, type CreateRecordKind } from '@/components/shared/create-record-modal'
-import { LeaseCreateModal } from '@/features/leases/lease-create-modal'
-import { SettlementTransferModal } from '@/features/settlements/settlement-transfer-modal'
-import { CreateSettlementModal } from '@/features/settlements/create-settlement-modal'
 import { AppToastHost } from '@/components/shared/app-toast'
 
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboard }
@@ -29,35 +24,17 @@ function GroupTree({ group, pathname, expanded, toggle, close }: { group: NavGro
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [createOpen, setCreateOpen] = useState(false)
-  const [createKind, setCreateKind] = useState<CreateRecordKind>('owner')
-  const [leaseOpen, setLeaseOpen] = useState(false)
-  const [settlementOpen, setSettlementOpen] = useState(false)
-  const [settlementCreateOpen, setSettlementCreateOpen] = useState(false)
-  const [settlementId, setSettlementId] = useState<string | undefined>()
   const [expanded, setExpanded] = useState<string | null>('dashboard')
   const [ready, setReady] = useState(false)
-  useEffect(() => { hydrateFrontendData(); const timer = window.setTimeout(() => setReady(true), 0); return () => window.clearTimeout(timer) }, [])
-  const interceptNewLink = (event: React.MouseEvent<HTMLDivElement>) => {
-    const target = event.target
-    if (!(target instanceof Element)) return
-    const link = target.closest('a[href]') as HTMLAnchorElement | null
-    const href = link?.getAttribute('href') ?? ''
-    if (href.startsWith('/leases/new')) { event.preventDefault(); setLeaseOpen(true); return }
-    if (href.startsWith('/owner-settlements/new')) { event.preventDefault(); const selectedSettlement = new URL(href, window.location.origin).searchParams.get('settlement') ?? undefined; if (selectedSettlement) { setSettlementId(selectedSettlement); setSettlementOpen(true) } else setSettlementCreateOpen(true); return }
-    const kindByPath: Record<string, CreateRecordKind> = { '/owners/new': 'owner', '/properties/new': 'property', '/units/new': 'unit', '/tenants/new': 'tenant', '/payments/new': 'payment', '/expenses/new': 'expense', '/management-contracts/new': 'managementContract', '/maintenance/new': 'maintenance' }
-    if (href in kindByPath) { event.preventDefault(); setCreateKind(kindByPath[href]); setCreateOpen(true) }
-  }
+  const setCreateOpen = (_open: boolean) => { router.push('/owners/new') }
+  useEffect(() => { const timer = window.setTimeout(() => setReady(true), 0); return () => window.clearTimeout(timer) }, [])
   if (!ready) return <div className="app-shell" dir="rtl" />
-  return <div className="app-shell" dir="rtl" onClickCapture={interceptNewLink}>
+  return <div className="app-shell" dir="rtl">
     <button className="mobile-menu" onClick={() => setMobileOpen(!mobileOpen)} aria-label="فتح القائمة"><Menu /></button>
     <aside className={mobileOpen ? 'app-sidebar open' : 'app-sidebar'}><div className="brand-lockup"><Image src="/logo.png" alt="بدر الصيوان للعقارات" width={184} height={64} priority className="brand-image" /><span>نظام إدارة الأملاك</span></div><nav className="tree-navigation">{groups.map((group) => <GroupTree key={group.id} group={group} pathname={pathname} expanded={expanded === group.id} toggle={() => setExpanded(expanded === group.id ? null : group.id)} close={() => setMobileOpen(false)} />)}</nav><div className="sidebar-profile"><div className="profile-avatar">أ</div><div><b>أحمد السالم</b><span>مدير النظام</span></div></div></aside>
     <main className="app-main"><header className="app-header"><div className="header-title"><small>إدارة الأملاك</small><strong>شركة بدر الصيوان للعقارات</strong></div><div className="header-tools"><Link className="notification-button" href="/notifications" aria-label="الإشعارات"><Bell size={20} /><i>2</i></Link><button className="quick-add" onClick={() => setCreateOpen(true)}><Plus size={17} /> إضافة جديد</button></div></header>{children}</main>
-    <CreateRecordModal key={`${createOpen}-${createKind}`} open={createOpen} initialKind={createKind} onClose={() => setCreateOpen(false)} />
-    <LeaseCreateModal open={leaseOpen} onClose={() => setLeaseOpen(false)} />
-    <SettlementTransferModal key={`${settlementOpen}-${settlementId ?? 'new'}`} open={settlementOpen} initialSettlementId={settlementId} onClose={() => setSettlementOpen(false)} />
-    <CreateSettlementModal key={String(settlementCreateOpen)} open={settlementCreateOpen} onClose={() => setSettlementCreateOpen(false)} />
     <AppToastHost />
   </div>
 }

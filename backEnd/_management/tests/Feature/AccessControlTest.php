@@ -42,6 +42,19 @@ class AccessControlTest extends TestCase
         $this->withToken($token)->getJson('/v1/roles')->assertOk()->assertJsonCount(1, 'data.items')->assertJsonPath('data.items.0.organization_id', $organizationId);
     }
 
+    public function test_role_and_user_management_are_authorized_and_audited(): void
+    {
+        [$organizationId] = $this->organization(); $user = $this->user($organizationId, 'admin@example.test');
+        $permissions = collect(['settings.roles.view', 'settings.roles.manage', 'settings.users.view', 'settings.users.manage'])->map(fn (string $code) => Permission::create(['id' => (string) Str::uuid(), 'code' => $code, 'name' => $code, 'module' => 'settings']));
+        $adminRole = Role::create(['id' => (string) Str::uuid(), 'organization_id' => $organizationId, 'code' => 'admin', 'name' => 'Admin']); $adminRole->permissions()->sync($permissions->pluck('id')); $user->roles()->attach($adminRole);
+        $token = $this->loginToken($organizationId, $user->email);
+        $role = $this->withToken($token)->postJson('/v1/roles', ['code' => 'collector', 'name' => 'Collector', 'permissionIds' => [$permissions->first()->id]])->assertCreated()->json('data');
+        $created = $this->withToken($token)->postJson('/v1/users', ['fullName' => 'Collector User', 'email' => 'collector@example.test', 'password' => 'password-long-enough', 'roleIds' => [$role['id']]])->assertCreated()->json('data');
+        $this->withToken($token)->patchJson('/v1/users/'.$created['id'], ['status' => 'inactive', 'version' => $created['version']])->assertOk()->assertJsonPath('data.status', 'inactive');
+        $this->assertDatabaseHas('audit_logs', ['organization_id' => $organizationId, 'action' => 'role.created']);
+        $this->assertDatabaseHas('audit_logs', ['organization_id' => $organizationId, 'action' => 'user.updated']);
+    }
+
     private function organization(): array
     {
         $id = (string) Str::uuid();

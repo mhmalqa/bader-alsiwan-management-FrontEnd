@@ -1,1 +1,1 @@
-import { RecordFormPage } from '@/features/shared/components/record-pages'; export default function Page() { return <RecordFormPage entity="properties" /> }
+import { PropertyFormPage } from '@/features/properties/form-page'; export default function Page() { return <PropertyFormPage /> }
